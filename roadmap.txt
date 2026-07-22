@@ -1,0 +1,72 @@
+## Phase 0 — Environment & Mental Model Shift (2-3 days)
+| Topic | Gotchas to know cold |
+|---|---|
+| Install Go, GOPATH vs Go Modules (`go mod init`) | Why Go abandoned GOPATH-style dependency management |
+| `go run`, `go build`, `go fmt`, `go vet` | gofmt is non-negotiable — the community treats unformatted code as broken |
+| Workspace structure (`cmd/`, `internal/`, `pkg/`) | What `internal/` actually enforces (compiler-level visibility, not convention) |
+| Static typing + compiled binary mindset | No JVM/Node runtime — single static binary, cross-compilation via `GOOS`/`GOARCH` |
+
+## Phase 1 — Core Syntax (Week 1)
+| Topic | Gotchas |
+|---|---|
+| Variables, `:=` vs `var`, zero values | Every type has a zero value (no `null`/`undefined`) — this changes how you design structs |
+| Arrays vs Slices | Slices share underlying arrays — append() can silently mutate or silently reallocate |
+| Maps | No ordering guarantee, nil map read vs write panics |
+| Structs (Go's answer to classes) | No classes/inheritance — composition only |
+| Pointers | No pointer arithmetic; `*T` vs `T` receiver semantics |
+| Functions, multiple return values, named returns | `error` as a return value, not an exception |
+| `defer`, `panic`, `recover` | defer runs LIFO; recover only works inside deferred functions |
+
+## Phase 2 — "OOP" the Go Way (Week 2)
+| Topic | Gotchas |
+|---|---|
+| Methods on structs (value vs pointer receivers) | Mixing receiver types on the same struct is a classic bug source |
+| Interfaces | Implicit satisfaction — no `implements` keyword; "accept interfaces, return structs" |
+| Embedding (composition over inheritance) | Struct embedding vs interface embedding — how Go fakes "inheritance" |
+| Empty interface `interface{}` / `any` | Type assertions vs type switches |
+| Error handling patterns | `errors.Is`, `errors.As`, wrapping with `%w`, custom error types |
+
+Since you already internalized Interface vs Abstract Class and Composition vs Inheritance in Java, this phase will mostly be "same idea, stricter syntax" — Go has no abstract classes at all, only interfaces + embedding.
+
+## Phase 3 — Concurrency (this is Go's actual selling point — Week 3)
+| Topic | Gotchas |
+|---|---|
+| Goroutines | Cheap, but goroutine leaks are the #1 production bug in Go services |
+| Channels (buffered vs unbuffered) | Sending on closed channel panics; receiving from closed channel returns zero value |
+| `select` statement | Default case, timeout patterns |
+| `sync.WaitGroup`, `sync.Mutex`, `sync.RWMutex` | When to use channels vs mutexes ("share memory by communicating") |
+| `sync.Once`, `sync/atomic` | Similar to your AtomicInteger/volatile knowledge from Java — map that intuition over |
+| Context package (`context.Context`) | Cancellation propagation, deadlines — this is how Go does what Java does with thread interrupts/CompletableFuture cancellation |
+
+This phase is where your Java thread/Future/CompletableFuture knowledge pays off directly — same problems (race conditions, deadlocks, thread pools), different tools.
+
+## Phase 4 — Server-Side Go / Backend (Week 4-5) — your actual job requirement
+| Topic | Gotchas |
+|---|---|
+| `net/http` standard library first | Understand it before reaching for a framework — interviewers ask "how would you do this with stdlib" |
+| Router/framework: Gin or Fiber (pick one) | Gin is more idiomatic/mature; Fiber is Express-like (familiar to you) but uses fasthttp under the hood — know the tradeoff |
+| Middleware pattern | Structurally similar to Express middleware — logging, auth, recovery middleware |
+| JSON marshaling/unmarshaling (`encoding/json`) | Struct tags (`json:"field_name"`), omitempty, custom Marshal/Unmarshal |
+| Database layer: `database/sql` + a driver, or GORM | GORM is the "ORM" comfort zone coming from Mongoose/Prisma; raw `database/sql` teaches you what's actually happening |
+| Config management (viper or env vars) | 12-factor app config patterns |
+| Project structure for real services | Clean/hexagonal architecture in Go — maps closely to your controller/service/repository pattern from LeapMentor |
+| Testing (`testing` package, `testify`) | Table-driven tests are the idiomatic Go pattern — very different from Jest's describe/it style |
+| gRPC + Protocol Buffers (if the client uses microservices) | Worth learning even if not immediately required — very common in Go shops |
+| Logging (`zap` or `zerolog`) | Structured logging — you already know why this matters from Winston/Logtail |
+| Graceful shutdown | `context` + signal handling — production services must drain in-flight requests |
+
+## Phase 5 — Production-Grade Concerns (Week 6+)
+| Topic | Gotchas |
+|---|---|
+| Dependency injection (manual, or `wire`) | Go has no Spring-style DI container — it's explicit constructor injection |
+| Error handling at scale | Sentinel errors vs custom error types vs wrapped errors |
+| Rate limiting / caching (Redis in Go) | `go-redis` client — directly transferable from your BullMQ/Redis experience |
+| Docker + deployment | Multi-stage Dockerfiles are trivial in Go (single static binary) — actually easier than Node |
+| Profiling (`pprof`) | Go's built-in profiler — no external APM needed to start |
+| Common interview/production questions | Slice internals (len vs cap), why maps aren't safe for concurrent access, goroutine leak detection, why Go removed exceptions in favor of explicit errors |
+
+## Suggested pacing
+- **Weeks 1-2**: Syntax + Go's OOP model — do this via small CLI programs, not tutorials alone
+- **Week 3**: Concurrency — build a small worker pool / rate limiter from scratch (you'll recognize this from your Redis rate limiter work)
+- **Weeks 4-5**: Rebuild a slice of LeapMentor's backend in Go (e.g., the booking/slot-locking logic) — this is the fastest way to convert Java/Node fluency into Go fluency, since you already know the business logic cold
+- **Week 6+**: Production concerns, then start reading real Go codebases in the client's domain if you can get access
