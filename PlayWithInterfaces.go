@@ -21,7 +21,7 @@ func (r Robot) Speak() string {
 	return r.name + " says beep beep."
 }
 
-//interfaces having multiple methods and to satisfy it the type should hav those all methods .letss check this
+//interfaces having multiple methods and to satisfy it the type should have those all methods .lets check this
 type Vehicle interface {
 	Start() string
 	Stop() string
