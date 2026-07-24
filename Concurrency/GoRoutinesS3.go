@@ -57,6 +57,7 @@ func main() {
 
 	ch3 := make(chan string)
 	go sendGreetings(ch3)
+
 	go sendFarewell(ch3)
 
 	res1 := <-ch3
@@ -64,7 +65,7 @@ func main() {
 	fmt.Println(res1)
 	fmt.Println(res2)
 
-	fmt.Println("----------------------------")
+	fmt.Println("-----------------------------")
 	go calculateSquare(8, ch)
 	printResultReceiveOnly(ch)
 	fmt.Println("done with main.....!")
