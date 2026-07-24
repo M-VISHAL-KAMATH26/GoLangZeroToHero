@@ -10,25 +10,32 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"sync"
 )
 
-func brewCoffee() {
+func brewCoffee(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for i := 0; i < 3; i++ {
 		fmt.Println("Coffee :step ", i)
 	}
 }
-func toastBread() {
+func toastBread(wg *sync.WaitGroup) {
+	defer wg.Done()
 	for i := 0; i < 3; i++ {
 		fmt.Println("Bread :step ", i)
 	}
 }
 func main() {
 	fmt.Println("welcome to the session 1 problem solving....!")
+	var wg sync.WaitGroup
 
-	go brewCoffee()
-	go toastBread()
+	wg.Add(1)
+	go brewCoffee(&wg)
 
-	time.Sleep(100 * time.Millisecond)
+	wg.Add(1)
+	go toastBread(&wg)
+
+	wg.Wait()
+	//time.Sleep(100 * time.Millisecond)
 	fmt.Println("end of the main go routine")
 }
